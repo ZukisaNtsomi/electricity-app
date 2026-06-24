@@ -4,15 +4,16 @@ const cors = require("cors");
 
 const app = express();
 
+// ✅ Middleware
 app.use(cors());
 app.use(express.json());
 
-// ✅ ROOT ROUTE
+// ✅ ROOT ROUTE (THIS FIXES "Not Found")
 app.get("/", (req, res) => {
   res.send("API working ✅");
 });
 
-// ✅ TEST API
+// ✅ GET TEST DATA
 app.get("/api/data", (req, res) => {
   res.json([
     {
@@ -26,7 +27,7 @@ app.get("/api/data", (req, res) => {
   ]);
 });
 
-// ✅ ADD (simulate)
+// ✅ ADD TRANSACTION (SIMULATED)
 app.post("/api/add", (req, res) => {
   const token = Math.floor(100000000000 + Math.random() * 900000000000);
 
@@ -36,10 +37,9 @@ app.post("/api/add", (req, res) => {
   });
 });
 
-// ✅ PORT (MANDATORY)
+// ✅ PORT FOR RENDER
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
-``
