@@ -5,6 +5,7 @@ const cors = require("cors");
 
 const app = express();
 
+// ✅ Middleware
 app.use(cors());
 app.use(express.json());
 
@@ -16,21 +17,21 @@ const db = mysql.createConnection({
   database: "s3_imvs"
 });
 
-// ✅ connect
+// ✅ Connect
 db.connect((err) => {
   if (err) {
-    console.log("❌ DB error:", err);
+    console.log("❌ Database error:", err);
   } else {
     console.log("✅ MySQL Connected");
   }
 });
 
-// ✅ test route
+// ✅ TEST ROUTE
 app.get("/", (req, res) => {
   res.send("API working ✅");
 });
 
-// ✅ GET transactions
+// ✅ GET DATA
 app.get("/api/data", (req, res) => {
   const sql = `
     SELECT id, user, bp_acc_id, txn_type, txn_state, date
@@ -44,6 +45,7 @@ app.get("/api/data", (req, res) => {
       console.log("❌ Query error:", err);
       return res.status(500).json({ error: "Database error" });
     }
+
     res.json(result);
   });
 });
@@ -67,13 +69,16 @@ app.post("/api/add", (req, res) => {
     }
 
     res.json({
-      message: "✅ Electricity purchased successfully",
+      message: "✅ Electricity purchased",
       token: token
     });
   });
 });
 
-// ✅ RUN SERVER
-app.listen(3000, () => {
-  console.log("🚀 Server running on http://localhost:3000");
+// ✅ IMPORTANT FOR RENDER (DO NOT REMOVE)
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
 });
+``
