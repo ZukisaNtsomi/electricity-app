@@ -4,16 +4,15 @@ const cors = require("cors");
 
 const app = express();
 
-// ✅ Middleware
 app.use(cors());
 app.use(express.json());
 
-// ✅ TEST ROUTE (VERY IMPORTANT FOR DEPLOYMENT)
+// ✅ ROOT ROUTE
 app.get("/", (req, res) => {
   res.send("API working ✅");
 });
 
-// ✅ SAMPLE DATA (temporary while DB not online)
+// ✅ TEST API
 app.get("/api/data", (req, res) => {
   res.json([
     {
@@ -27,11 +26,8 @@ app.get("/api/data", (req, res) => {
   ]);
 });
 
-// ✅ BUY ELECTRICITY (simulate token)
+// ✅ ADD (simulate)
 app.post("/api/add", (req, res) => {
-  const { user, meter, bp_acc_id, txn_type } = req.body;
-
-  // ✅ Generate fake electricity token
   const token = Math.floor(100000000000 + Math.random() * 900000000000);
 
   res.json({
@@ -40,9 +36,10 @@ app.post("/api/add", (req, res) => {
   });
 });
 
-// ✅ IMPORTANT FOR RENDER (DO NOT REMOVE)
+// ✅ PORT (MANDATORY)
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
+``
