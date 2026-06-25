@@ -1,178 +1,61 @@
 
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Electricity App</title>
-
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f6f8;
-      padding: 20px;
-    }
-
-    h1 {
-      color: #2e7d32;
-    }
-
-    input {
-      padding: 10px;
-      width: 250px;
-      margin-bottom: 10px;
-      display: block;
-    }
-
-    button {
-      padding: 10px;
-      background: #2e7d32;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-
-    table {
-      margin-top: 20px;
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    th, td {
-      padding: 10px;
-      border: 1px solid #ccc;
-    }
-
-    th {
-      background: #2e7d32;
-      color: white;
-    }
-
-    #tokenBox {
-      background: #fff;
-      padding: 15px;
-      border: 2px solid #2e7d32;
-      margin-top: 10px;
-      display: none;
-    }
-  </style>
-</head>
-
-<body>
-
-<h1>⚡ Electricity Dashboard</h1>
-
-<h2>Buy Electricity</h2>
-
-<input type="text" id="user" placeholder="Username">
-<input type="text" id="meter" placeholder="Meter Number">
-<input type="number" id="account" placeholder="Account ID">
-<input type="number" id="type" placeholder="Transaction Type">
-
-<button onclick="buy()">Buy Electricity</button>
-
-<p id="message"></p>
-
-<!-- ✅ TOKEN DISPLAY -->
-<div id="tokenBox">
-  <h3>✅ Token Generated</h3>
-  <p id="token" style="font-size: 20px; font-weight: bold;"></p>
-</div>
-
-<hr>
-
-<h2>Transactions</h2>
-<div id="app">Loading...</div>
-
 <script>
 
-// ✅ LOAD DATA
-async function loadData() {
-  try {
-    const res = await fetch("http://127.0.0.1:3000/api/data");
-    const data = await res.json();
+const API_URL = "http://localhost:3000";
 
-    let html = "<table>";
-    html += `
-      <tr>
-        <th>ID</th>
-        <th>User</th>
-        <th>Account</th>
-        <th>Type</th>
-        <th>Status</th>
-        <th>Date</th>
-      </tr>
-    `;
+// ✅ BUY ELECTRICITY
+function buy() {
+  const user = document.getElementById("user").value;
+  const account = document.getElementById("account").value;
+  const amount = parseFloat(document.getElementById("amount").value);
 
-    data.forEach(txn => {
-      html += `
-        <tr>
-          <td>${txn.id}</td>
-          <td>${txn.user}</td>
-          <td>${txn.bp_acc_id}</td>
-          <td>${txn.txn_type}</td>
-          <td>${txn.txn_state}</td>
-          <td>${txn.date}</td>
-        </tr>
-      `;
-    });
-
-    html += "</table>";
-    document.getElementById("app").innerHTML = html;
-
-  } catch (err) {
-    document.getElementById("app").innerText = "❌ Error loading data";
+  if (!user || !account || !amount) {
+    alert("Fill all fields");
+    return;
   }
+
+  fetch(API_URL + "/api/vend", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      user: user,
+      bp_acc_id: parseInt(account),
+      amount: amount
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      document.getElementById("msg").innerText =
+`✅ Token: ${data.token}
+⚡ Units: ${data.units} kWh
+💰 Amount: R${data.amount}`;
+
+      loadData();
+    } else {
+      alert(data.message);
+    }
+  });
 }
 
+// ✅ LOAD TRANSACTIONS
+function loadData() {
+  fetch(API_URL + "/api/transactions")
+    .then(res => res.json())
+    .then(data => {
+      const list = document.getElementById("list");
+      list.innerHTML = "";
 
-// ✅ BUY FUNCTION
-async function buy() {
-  const user = document.getElementById("user").value;
-  const meter = document.getElementById("meter").value;
-  const account = document.getElementById("account").value;
-  const type = document.getElementById("type").value;
-
-  document.getElementById("message").innerText = "Processing...";
-
-  try {
-    const res = await fetch("http://127.0.0.1:3000/api/add", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        user: user,
-        bp_acc_id: account,
-        txn_type: type,
-        meter: meter
-      })
+      data.forEach(txn => {
+        const li = document.createElement("li");
+        li.innerText =
+          `User: ${txn.user} | Meter: ${txn.bp_acc_id} | R${txn.amount} | ${txn.units} kWh`;
+        list.appendChild(li);
+      });
     });
-
-    const data = await res.json();
-
-    // ✅ show success
-    document.getElementById("message").innerText =
-      "✅ Electricity purchased successfully";
-
-    // ✅ show token
-    document.getElementById("tokenBox").style.display = "block";
-    document.getElementById("token").innerText = data.token;
-
-    // ✅ clear form
-    document.getElementById("user").value = "";
-    document.getElementById("meter").value = "";
-    document.getElementById("account").value = "";
-    document.getElementById("type").value = "";
-
-    loadData();
-
-  } catch {
-    document.getElementById("message").innerText =
-      "❌ Error processing transaction";
-  }
 }
 
 // ✅ LOAD ON START
 loadData();
 
 </script>
-
-</body>
-</html>
