@@ -9,7 +9,12 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ✅ DB CONNECTION
+/*
+====================================
+✅ DATABASE CONNECTION (LOCAL ONLY)
+====================================
+⚠️ Will NOT work on Render (localhost DB)
+*/
 const db = mysql.createConnection({
   host: "localhost",
   user: "root",
@@ -25,7 +30,20 @@ db.connect(err => {
   console.log("✅ Connected to MySQL (s3_ims)");
 });
 
-// ✅ TOKEN GENERATION (20-digit)
+/*
+====================================
+✅ ROOT ROUTE (FIXES "Not Found")
+====================================
+*/
+app.get("/", (req, res) => {
+  res.send("API working ✅");
+});
+
+/*
+====================================
+✅ TOKEN GENERATION
+====================================
+*/
 function generateToken() {
   let token = "";
   for (let i = 0; i < 20; i++) {
@@ -34,7 +52,11 @@ function generateToken() {
   return token.match(/.{1,4}/g).join("-");
 }
 
-// ✅ CALCULATE UNITS (with tiers)
+/*
+====================================
+✅ UNITS CALCULATION
+====================================
+*/
 function calculateUnits(amount) {
   let price;
 
@@ -45,11 +67,11 @@ function calculateUnits(amount) {
   return (amount / price).toFixed(2);
 }
 
-//
-// ✅ API ROUTES
-//
-
-// ✅ GET TRANSACTIONS
+/*
+====================================
+✅ GET TRANSACTIONS
+====================================
+*/
 app.get("/api/transactions", (req, res) => {
   db.query("SELECT * FROM transactions ORDER BY id DESC", (err, results) => {
     if (err) return res.status(500).json({ error: "DB error" });
@@ -57,7 +79,11 @@ app.get("/api/transactions", (req, res) => {
   });
 });
 
-// ✅ BUY ELECTRICITY
+/*
+====================================
+✅ BUY ELECTRICITY
+====================================
+*/
 app.post("/api/vend", (req, res) => {
   const { user, bp_acc_id, amount } = req.body;
 
@@ -76,7 +102,7 @@ app.post("/api/vend", (req, res) => {
     VALUES (?, ?, ?, ?)
   `;
 
-  db.query(sql, [user, bp_acc_id, amount, units], (err, result) => {
+  db.query(sql, [user, bp_acc_id, amount, units], (err) => {
     if (err) {
       console.error(err);
       return res.json({
@@ -94,7 +120,11 @@ app.post("/api/vend", (req, res) => {
   });
 });
 
-// ✅ REPORT API (TOTAL SALES)
+/*
+====================================
+✅ REPORT API
+====================================
+*/
 app.get("/api/report", (req, res) => {
   db.query("SELECT SUM(amount) AS total FROM transactions", (err, result) => {
     if (err) return res.status(500).json({ error: "Report error" });
@@ -105,7 +135,13 @@ app.get("/api/report", (req, res) => {
   });
 });
 
-// ✅ START SERVER
-app.listen(3000, () => {
-  console.log("🚀 API running on http://localhost:3000");
+/*
+====================================
+✅ IMPORTANT FOR RENDER (FIX)
+====================================
+*/
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
 });
